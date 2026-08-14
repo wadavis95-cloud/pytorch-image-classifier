@@ -1,9 +1,15 @@
 import torch
+import torch.nn as nn
 from torchvision import datasets, transforms
-import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 
+from model import CIFARClassifier
+from train import train_model
+from evaluate import evaluate_model
+
+
 transform = transforms.ToTensor()
+
 train_dataset = datasets.CIFAR10(
     root="data",
     train=True,
@@ -11,31 +17,12 @@ train_dataset = datasets.CIFAR10(
     transform=transform
 )
 
-print("Number of training images:", len(train_dataset))
-print("Classes:", train_dataset.classes)
-
-image, label = train_dataset[0]
-
-print("Image shape:", image.shape)
-print("Label number:", label)
-print("Label name:", train_dataset.classes[label])
-
-for i in range(5):
-    image, label = train_dataset[i]
-
-    image = image.permute(1, 2, 0)
-
-    plt.figure()
-    plt.imshow(image)
-    plt.title(train_dataset.classes[label])
-    plt.axis("off")
-
-    plt.show()
-
-print("\nClass labels")
-
-for i, class_name in enumerate(train_dataset.classes):
-    print(i, "->", class_name)
+test_dataset = datasets.CIFAR10(
+    root="data",
+    train=False,
+    download=True,
+    transform=transform
+)
 
 train_loader = DataLoader(
     train_dataset,
@@ -43,8 +30,34 @@ train_loader = DataLoader(
     shuffle=True
 )
 
-images, labels = next(iter(train_loader))
+test_loader = DataLoader(
+    test_dataset,
+    batch_size=64,
+    shuffle=False
+)
 
-print("\nBatch image shape:", images.shape)
-print("Batch label shape:", labels.shape)
-print("First 10 labels:", labels[:10])
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+model = CIFARClassifier().to(device)
+
+criterion = nn.CrossEntropyLoss()
+
+optimizer = torch.optim.Adam(
+    model.parameters(),
+    lr=0.001
+)
+
+train_model(
+    model,
+    train_loader,
+    criterion,
+    optimizer,
+    device,
+    epochs=3
+)
+
+evaluate_model(
+    model,
+    test_loader,
+    device
+)
