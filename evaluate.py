@@ -25,6 +25,27 @@ def evaluate_model(model, test_loader, device):
 
     return accuracy
 
+def calculate_accuracy(model, data_loader, device):
+    model.eval()
+
+    correct = 0
+    total = 0
+
+    with torch.no_grad():
+        for images, labels in data_loader:
+            images = images.to(device)
+            labels = labels.to(device)
+
+            outputs = model(images)
+            _, predicted = torch.max(outputs, 1)
+
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+    accuracy = 100 * correct / total
+
+    return accuracy
+
 def inspect_predictions(model, test_loader, device, classes, num_images=10):
     model.eval()
 

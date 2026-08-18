@@ -9,7 +9,8 @@ from evaluate import (
     evaluate_model,
     inspect_predictions,
     confusion_matrix_counts,
-    most_common_confusions
+    most_common_confusions,
+    calculate_accuracy
 )
 
 train_transform = transforms.Compose([
@@ -102,3 +103,25 @@ most_common_confusions(
     train_dataset.classes,
     top_n=10
 )
+
+train_accuracy = calculate_accuracy(
+    model,
+    train_loader,
+    device
+)
+
+test_accuracy = calculate_accuracy(
+    model,
+    test_loader,
+    device
+)
+
+print(f"\nTraining Accuracy: {train_accuracy:.2f}%")
+print(f"Test Accuracy: {test_accuracy:.2f}%") 
+
+torch.save(
+    model.state_dict(),
+    "models/cifar_classifier.pth"
+)
+
+print("\nModel saved to models/cifar_classifier.pth")
