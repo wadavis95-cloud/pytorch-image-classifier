@@ -125,3 +125,33 @@ torch.save(
 )
 
 print("\nModel saved to models/cifar_classifier.pth")
+
+loaded_model = CIFARClassifier().to(device)
+
+loaded_model.load_state_dict(
+    torch.load(
+        "models/cifar_classifier.pth",
+        map_location=device
+    )
+)
+
+loaded_model.eval()
+
+images, labels = next(iter(test_loader))
+
+images = images.to(device)
+
+with torch.no_grad():
+    outputs = loaded_model(images)
+
+_, predicted = torch.max(outputs, 1)
+
+print(
+    "\nLoaded model prediction:",
+    train_dataset.classes[predicted[0].item()]
+)
+
+print(
+    "Actual label:",
+    train_dataset.classes[labels[0].item()]
+)
